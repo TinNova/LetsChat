@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">LetsChat</string>
+    <string name="send">Send</string>
+    <string name="send_message_hint">Send a message</string>
+</resources>
