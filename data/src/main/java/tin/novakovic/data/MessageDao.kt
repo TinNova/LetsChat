@@ -16,6 +16,9 @@ interface MessageDao {
     fun insertMessage(messageEntity: MessageEntity): Completable
 
     @Query("SELECT * FROM messageEntity ORDER BY timestamp DESC LIMIT 1")
-    fun getLatestMessage(): Single<List<MessageEntity>>
+    fun fetchLatestMessage(): Single<MessageEntity>
+
+    @Query("SELECT * FROM messageEntity")
+    fun fetchAllMessages(): Single<List<MessageEntity>>
 
 }

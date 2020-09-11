@@ -2,4 +2,9 @@
     <string name="app_name">LetsChat</string>
     <string name="send">Send</string>
     <string name="send_message_hint">Send a message</string>
+    <string name="menu_item_be_receiver">Be Receiver</string>
+    <string name="menu_item_be_sender">Be Sender</string>
+    <string name="menu_item_switch">Sender/Receiver</string>
+
+
 </resources>
