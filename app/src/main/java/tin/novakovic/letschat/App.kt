@@ -3,14 +3,14 @@ package tin.novakovic.letschat
 import android.app.Application
 import tin.novakovic.letschat.di.component.AppComponent
 import tin.novakovic.letschat.di.component.DaggerAppComponent
+import tin.novakovic.letschat.di.modules.AppModule
+import tin.novakovic.letschat.di.modules.RoomModule
 
-open class App : Application() {
+class App : Application() {
 
-    val appComponent: AppComponent by lazy {
-        initializeComponent()
-    }
+    val component: AppComponent = DaggerAppComponent
+        .builder()
+        .roomModule(RoomModule(this))
+        .build()
 
-    open fun initializeComponent(): AppComponent {
-        return DaggerAppComponent.factory().create(applicationContext)
-    }
 }

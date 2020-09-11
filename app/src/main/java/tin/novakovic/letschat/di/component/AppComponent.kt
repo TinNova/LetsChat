@@ -3,18 +3,14 @@ package tin.novakovic.letschat.di.component
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
-import tin.novakovic.letschat.MainActivity
+import tin.novakovic.letschat.ui.MainActivity
 import tin.novakovic.letschat.di.modules.AppModule
+import tin.novakovic.letschat.di.modules.RoomModule
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [AppModule::class])
+@Component(modules = [AppModule::class, RoomModule::class])
 interface AppComponent {
-
-    @Component.Factory
-    interface Factory {
-        fun create(@BindsInstance context: Context): AppComponent
-    }
 
     fun inject(activity: MainActivity)
 
