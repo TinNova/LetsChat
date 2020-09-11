@@ -8,6 +8,8 @@ buildscript {
         version_room = "2.2.5"
         version_constraint_layout = "2.0.1"
         version_recycler_view = "1.1.0"
+        version_rxandroid = "2.1.0"
+        version_rxkotlin = "2.2.0"
     }
 
     repositories {

@@ -53,6 +53,10 @@ dependencies {
     implementation "com.google.dagger:dagger:$version_dagger"
     kapt "com.google.dagger:dagger-compiler:$version_dagger"
 
+    // Rx
+    implementation "io.reactivex.rxjava2:rxkotlin:$version_rxkotlin"
+    implementation "io.reactivex.rxjava2:rxandroid:$version_rxandroid"
+
     // room
     implementation "androidx.room:room-rxjava2:$version_room"
     implementation "androidx.room:room-runtime:$version_room"
