@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.sent_chat_item.view.*
 import tin.novakovic.data.MessageEntity
 import tin.novakovic.letschat.R
 
+
 class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -61,6 +62,7 @@ class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun bind(message: MessageEntity) {
             itemView.sent_message.text = message.message
+            itemView.sent_message.setBackgroundResource(R.drawable.bubble_sender)
         }
     }
 
@@ -68,6 +70,7 @@ class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         fun bind(message: MessageEntity) {
             itemView.received_message.text = message.message
+            itemView.received_message.setBackgroundResource(R.drawable.bubble_receiver)
         }
     }
 
