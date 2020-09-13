@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class MessageEntity(
-    val message: String,
-    val isSent: Boolean,
-    @PrimaryKey val timestamp: Long
+    val message: String = "",
+    val isSent: Boolean = false,
+    @PrimaryKey val timestamp: Long = 0
 )

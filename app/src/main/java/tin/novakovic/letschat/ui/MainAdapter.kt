@@ -6,44 +6,54 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.received_chat_item.view.*
 import kotlinx.android.synthetic.main.sent_chat_item.view.*
-import tin.novakovic.data.MessageEntity
+import kotlinx.android.synthetic.main.timestamp_chat_item.view.*
+import tin.novakovic.domain.MessageModel
+import tin.novakovic.domain.MessageType
 import tin.novakovic.letschat.R
 
 
-class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+open class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val TYPE_SENT = 1
         private const val TYPE_RECEIVED = 2
+        private const val TYPE_TIMESTAMP = 3
     }
 
-    fun addMessages(messages: List<MessageEntity>) {
-        this.messages = messages as MutableList<MessageEntity>
+    fun addMessages(messages: List<MessageModel>) {
+        this.messages = messages.toMutableList()
         notifyDataSetChanged()
     }
 
-    fun addLatestMessage(message: MessageEntity) {
+    fun addLatestMessage(message: MessageModel) {
         messages.add(message)
         notifyItemInserted(messages.size)
     }
 
     // TODO: needs to be changed to a Domain Model with a formatted string as the date
-    private var messages: MutableList<MessageEntity> = mutableListOf()
+    var messages: MutableList<MessageModel> = mutableListOf()
+//    fun getMessages(): MutableList<MessageEntity> = messages
 
-    override fun getItemViewType(position: Int): Int =
-        if (messages[position].isSent) TYPE_SENT else TYPE_RECEIVED
+    override fun getItemViewType(position: Int): Int {
 
+        return when {
+            messages[position].messageType == MessageType.TIME_STAMP -> { TYPE_TIMESTAMP }
+            messages[position].isSent -> TYPE_SENT
+            else -> TYPE_RECEIVED
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == TYPE_SENT) {
-            SentViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.sent_chat_item, parent, false)
+        return when (viewType) {
+            TYPE_SENT -> SentViewHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.sent_chat_item, parent, false)
             )
-        } else {
-            ReceivedViewHolder(
+            TYPE_RECEIVED -> ReceivedViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.received_chat_item, parent, false)
+            )
+            else -> TimeStampViewHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.timestamp_chat_item, parent, false)
             )
         }
     }
@@ -54,23 +64,47 @@ class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         when (holder.itemViewType) {
             TYPE_SENT -> (holder as SentViewHolder).bind(messages[position])
             TYPE_RECEIVED -> (holder as ReceivedViewHolder).bind(messages[position])
+            TYPE_TIMESTAMP -> (holder as TimeStampViewHolder).bind(messages[position])
         }
     }
 
 
-    class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(message: MessageEntity) {
+
+        fun bind(message: MessageModel) {
             itemView.sent_message.text = message.message
-            itemView.sent_message.setBackgroundResource(R.drawable.bubble_sender)
+
+            messages
+            //This message should have tick if :
+            //  next message is either sent with 20 secs lapsed
+            //  or from the other person
+
+            when (message.messageType) {
+                MessageType.TAIL_MESSAGE -> itemView.sent_message.setBackgroundResource(R.drawable.bubble_sender_tail)
+                MessageType.MESSAGE -> itemView.sent_message.setBackgroundResource(R.drawable.bubble_sender)
+            }
         }
     }
 
-    class ReceivedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ReceivedViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(message: MessageEntity) {
+        fun bind(message: MessageModel) {
             itemView.received_message.text = message.message
-            itemView.received_message.setBackgroundResource(R.drawable.bubble_receiver)
+
+            when (message.messageType) {
+                MessageType.TAIL_MESSAGE -> itemView.received_message.setBackgroundResource(R.drawable.bubble_receiver_tail)
+                MessageType.MESSAGE -> itemView.received_message.setBackgroundResource(R.drawable.bubble_receiver)
+            }
+        }
+    }
+
+    inner class TimeStampViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        fun bind(message: MessageModel) {
+            itemView.timestamp_date.text = message.dayOfMessage
+            itemView.timestamp_time.text = message.hourAndTimeOfMessage
+
         }
     }
 

@@ -18,7 +18,7 @@ interface MessageDao {
     @Query("SELECT * FROM messageEntity ORDER BY timestamp DESC LIMIT 1")
     fun fetchLatestMessage(): Single<MessageEntity>
 
-    @Query("SELECT * FROM messageEntity")
+    @Query("SELECT * FROM messageEntity ORDER BY timestamp desc")
     fun fetchAllMessages(): Single<List<MessageEntity>>
 
 }

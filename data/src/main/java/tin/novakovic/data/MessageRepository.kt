@@ -7,7 +7,7 @@ import javax.inject.Inject
 class MessageRepository @Inject constructor(private val messageDao: MessageDao) {
 
     fun insertMessage(message: String, isSent: Boolean) : Completable =
-        messageDao.insertMessage(MessageEntity(message, isSent, System.currentTimeMillis() / 1000L))
+        messageDao.insertMessage(MessageEntity(message, isSent, System.currentTimeMillis()))
 
     fun fetchLatestMessage(): Single<MessageEntity> =
         messageDao.fetchLatestMessage()
