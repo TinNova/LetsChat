@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import tin.novakovic.domain.MessageHelper
+import tin.novakovic.domain.MessageType
 import tin.novakovic.letschat.DisposingViewModel
 import tin.novakovic.letschat.ui.MainViewState.*
 import javax.inject.Inject
@@ -59,7 +60,14 @@ class MainViewModel @Inject constructor(private val messageHelper: MessageHelper
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    viewState.value = ShowLatestMessage(it)
+                    if (it.size > 1) {
+                        if (it[1].messageType == MessageType.TIME_STAMP) {
+                            viewState.value = AddTimeStamp(it[1])
+                        } else {
+                            viewState.value = UpdatePreviousMessage(it[1])
+                        }
+                    }
+                    viewState.value = ShowLatestMessage(it[0])
                 }, {
                     viewState.value = ShowError
                 }

@@ -10,27 +10,97 @@ import javax.inject.Inject
 
 class MessageHelper @Inject constructor(private val messageRepo: MessageRepository) {
 
+    lateinit var mostRecentMessage: MessageEntity
+
     fun insertMessage(message: String, isSent: Boolean): Completable =
         messageRepo.insertMessage(message, isSent)
 
-    fun fetchLatestMessage(): Single<MessageModel> =
+    fun fetchLatestMessage(): Single<List<MessageModel>> =
         messageRepo.fetchLatestMessage()
             .map {
-                MessageModel(
-                    message = it.message,
-                    isSent = it.isSent,
-                    messageType = TAIL_MESSAGE
-                )
+                mapToMessageModel(it)
             }
 
     fun fetchAllMessages(): Single<List<MessageModel>> =
         messageRepo.fetchAllMessages()
-            .map { mapToMessageModel(it) }
+            .map {
+                mostRecentMessage = if (it.isNotEmpty()) it[0] else MessageEntity()
+                mapToListOfMessageModels(it)
+            }
             .map { it.reversed() }
 
 
+    // what about when the chat is empty?
+    private fun mapToMessageModel(currentMessage: MessageEntity): List<MessageModel> {
+
+        var messageModels: MutableList<MessageModel> = mutableListOf()
+
+        if (mostRecentMessage.timestamp == 0L) {
+
+            messageModels.add(
+                MessageModel(
+                    message = currentMessage.message,
+                    isSent = currentMessage.isSent,
+                    messageType = TAIL_MESSAGE
+                )
+            )
+
+        } else {
+
+                // if currentMessage and mostRecent were sent by the same person
+                if (currentMessage.isSent && mostRecentMessage.isSent ||
+                    !currentMessage.isSent && !mostRecentMessage.isSent
+                ) {
+
+                    // if twenty seconds elapsed show new message with tail
+                    if (twentySecsElapsed(currentMessage.timestamp, mostRecentMessage.timestamp)) {
+
+                        messageModels.add(
+                            MessageModel(
+                                message = currentMessage.message,
+                                isSent = currentMessage.isSent,
+                                messageType = TAIL_MESSAGE
+                            )
+                        )
+                        // if twenty seconds has not elapsed update previous message and show new message with tail
+                    } else {
+                        messageModels.add(
+                            MessageModel(
+                                message = currentMessage.message,
+                                isSent = currentMessage.isSent,
+                                messageType = TAIL_MESSAGE
+                            )
+                        )
+
+                        // remove tail from mostRecent message and give it to currentMessage
+                        messageModels.add(
+                            MessageModel(
+                                message = mostRecentMessage.message,
+                                isSent = mostRecentMessage.isSent,
+                                messageType = MESSAGE
+                            )
+                        )
+                    }
+
+                    // currentMessage and mostRecent were sent by different people
+                } else {
+
+                    messageModels.add(
+                        MessageModel(
+                            message = currentMessage.message,
+                            isSent = currentMessage.isSent,
+                            messageType = TAIL_MESSAGE
+                        )
+                    )
+                }
+        }
+
+        mostRecentMessage = currentMessage
+        return messageModels
+    }
+
     // what if it's the first time and the list is empty?
-    private fun mapToMessageModel(entityMessages: List<MessageEntity>): List<MessageModel> {
+    private fun mapToListOfMessageModels(entityMessages: List<MessageEntity>): List<MessageModel> {
 
         var previousMessage = MessageEntity()
         var messageModels: MutableList<MessageModel> = mutableListOf()
@@ -148,29 +218,31 @@ class MessageHelper @Inject constructor(private val messageRepo: MessageReposito
     }
 
     private fun twentySecsElapsed(
-        previousMessageTimeInMilliSecs: Long,
-        currentMessageTimeStampInSecs: Long
+        moreRecentTimeInMilliSecs: Long,
+        lessRecentTimeStampInSecs: Long
     ): Boolean {
 
-        val elapsedTime = previousMessageTimeInMilliSecs - currentMessageTimeStampInSecs
+        val elapsedTime = moreRecentTimeInMilliSecs - lessRecentTimeStampInSecs
 
         return elapsedTime >= TWENTY_SECS_IN_MILLI_SECS
     }
 
     private fun oneHourElapsed(
-        previousMessageOrCurrentTimeInMilliSecs: Long,
-        currentMessageTimeStampInMilliSecs: Long
+        moreRecentTimeInMilliSecs: Long,
+        lessRecentTimeStampInSecs: Long
     ): Boolean {
 
         val elapsedTime =
-            previousMessageOrCurrentTimeInMilliSecs - currentMessageTimeStampInMilliSecs
+            moreRecentTimeInMilliSecs - lessRecentTimeStampInSecs
 
-        return elapsedTime >= FIVE_MIN_IN_MILLI_SECS
+        return elapsedTime >= ONE_HOUR_IN_MILLI_SECS
     }
 
     companion object {
         const val ONE_HOUR_IN_MILLI_SECS = 3600000L
         const val FIVE_MIN_IN_MILLI_SECS = 300000L
         const val TWENTY_SECS_IN_MILLI_SECS = 20000L
+        const val FIVE_SECS_IN_MILLI_SECS = 5000L
+
     }
 }

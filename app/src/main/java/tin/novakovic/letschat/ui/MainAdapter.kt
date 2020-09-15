@@ -30,14 +30,28 @@ open class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyItemInserted(messages.size)
     }
 
+    fun updatePreviousMessage(message: MessageModel) {
+        messages.removeAt(messages.size - 1)
+        notifyItemChanged(messages.size, Unit)
+        messages.add(message)
+        notifyItemChanged(messages.size, Unit)
+    }
+
+    fun addTimeStamp(message: MessageModel) {
+        messages.add(message)
+        notifyItemInserted(messages.size)
+    }
+
     // TODO: needs to be changed to a Domain Model with a formatted string as the date
-    var messages: MutableList<MessageModel> = mutableListOf()
-//    fun getMessages(): MutableList<MessageEntity> = messages
+    private var messages: MutableList<MessageModel> = mutableListOf()
+    fun getLastIndexOfMessages(): Int = messages.size - 1
 
     override fun getItemViewType(position: Int): Int {
 
         return when {
-            messages[position].messageType == MessageType.TIME_STAMP -> { TYPE_TIMESTAMP }
+            messages[position].messageType == MessageType.TIME_STAMP -> {
+                TYPE_TIMESTAMP
+            }
             messages[position].isSent -> TYPE_SENT
             else -> TYPE_RECEIVED
         }
@@ -53,7 +67,8 @@ open class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     .inflate(R.layout.received_chat_item, parent, false)
             )
             else -> TimeStampViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.timestamp_chat_item, parent, false)
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.timestamp_chat_item, parent, false)
             )
         }
     }
@@ -71,14 +86,8 @@ open class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class SentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-
         fun bind(message: MessageModel) {
             itemView.sent_message.text = message.message
-
-            messages
-            //This message should have tick if :
-            //  next message is either sent with 20 secs lapsed
-            //  or from the other person
 
             when (message.messageType) {
                 MessageType.TAIL_MESSAGE -> itemView.sent_message.setBackgroundResource(R.drawable.bubble_sender_tail)
@@ -104,7 +113,6 @@ open class MainAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun bind(message: MessageModel) {
             itemView.timestamp_date.text = message.dayOfMessage
             itemView.timestamp_time.text = message.hourAndTimeOfMessage
-
         }
     }
 

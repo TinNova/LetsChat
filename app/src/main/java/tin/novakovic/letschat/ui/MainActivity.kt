@@ -35,22 +35,37 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
         observeViewState()
         main_recycler_view.adapter = adapter
-        main_recycler_view.layoutManager = LinearLayoutManager(
+        main_recycler_view.layoutManager
+
+        var l = LinearLayoutManager(
             this, LinearLayoutManager.VERTICAL, false
         )
+
+        l.stackFromEnd = true
+
+        main_recycler_view.layoutManager = l
 
         main_send_button.setOnClickListener {
             viewModel.onSendClicked(main_edit_text.text.toString())
         }
+
     }
 
     private fun observeViewState() {
         viewModel.viewState.observe(this, Observer {
             when (it) {
                 is ShowAllMessages -> adapter.addMessages(it.messages)
-                is ShowLatestMessage -> adapter.addLatestMessage(it.messageEntity)
+                is ShowLatestMessage -> adapter.addLatestMessage(it.message)
+                is UpdatePreviousMessage -> adapter.updatePreviousMessage(it.message)
+                is AddTimeStamp -> adapter.addTimeStamp(it.message)
             }
+            scrollToBottomOfRecyclerView()
         })
+
+    }
+
+    private fun scrollToBottomOfRecyclerView() {
+        main_recycler_view.smoothScrollToPosition(adapter.itemCount)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
